@@ -380,7 +380,6 @@ export default function FileEditor({ filePath, onClose, onSave }: FileEditorProp
             ))}
           </div>
           
-          {/* Editor */}
           <textarea
             ref={textareaRef}
             value={content}
