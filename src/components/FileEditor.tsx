@@ -367,7 +367,3 @@ export default function FileEditor({ filePath, onClose, onSave }: FileEditorProp
     </div>
   );
 }
-      </div>
-    </div>
-  );
-}
