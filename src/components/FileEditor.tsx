@@ -367,36 +367,6 @@ export default function FileEditor({ filePath, onClose, onSave }: FileEditorProp
     </div>
   );
 }
-        <div className="absolute inset-0 flex">
-          {/* Line Numbers */}
-          <div 
-            className="bg-gray-800 border-r border-gray-700 px-3 py-4 text-gray-400 text-right font-mono select-none flex-shrink-0"
-            style={{ fontSize: `${Math.max(fontSize - 2, 10)}px`, lineHeight: '1.5' }}
-          >
-            {content.split('\n').map((_, index) => (
-              <div key={index} className="leading-6">
-                {index + 1}
-              </div>
-            ))}
-          </div>
-          
-          <textarea
-            ref={textareaRef}
-            value={content}
-            onChange={(e) => handleContentChange(e.target.value)}
-            className={`flex-1 bg-gray-900 text-white p-4 font-mono resize-none focus:outline-none ${
-              wordWrap ? '' : 'whitespace-nowrap overflow-x-auto'
-            }`}
-            style={{ 
-              fontSize: `${fontSize}px`,
-              lineHeight: '1.5',
-              tabSize: 2
-            }}
-            placeholder="Start typing your code..."
-            spellCheck={false}
-            onKeyDown={handleKeyDown}
-          />
-        </div>
       </div>
     </div>
   );
