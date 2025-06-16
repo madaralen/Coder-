@@ -185,16 +185,30 @@ export default function FileEditor({ filePath, onClose, onSave }: FileEditorProp
   return (
     <div className="flex flex-col h-full bg-gray-900 text-white">
       {/* Desktop Header - Hidden on mobile since mobile header is in parent */}
-      <div className="hidden sm:flex bg-gray-800 border-b border-gray-700 items-center justify-between px-4 py-2">
-        <div className="flex items-center gap-3">
-          <Code className="text-blue-400" size={20} />
-          <div>
-            <h1 className="font-medium text-white">{fileName}</h1>
-            <p className="text-sm text-gray-400">{filePath}</p>
+      <div className="hidden sm:flex bg-gray-800 border-b border-gray-700 items-center justify-between px-4 py-2.5 shadow-sm">
+        <div className="flex items-center gap-3 min-w-0">
+          <FileText className="text-blue-400 flex-shrink-0" size={18} />
+          <div className="flex-1 min-w-0">
+            <h1 className="font-semibold text-white truncate" title={fileName}>{fileName}{isDirty ? "*" : ""}</h1>
+            <p className="text-xs text-gray-400 truncate" title={filePath}>{filePath}</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={handleSave}
+            disabled={!isDirty}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors
+              ${isDirty 
+                ? 'bg-blue-600 hover:bg-blue-500 text-white' 
+                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+            }`}
+            title={isDirty ? "Save (Ctrl+S)" : "Saved"}
+          >
+            <Save size={14} />
+            {isDirty ? 'Save' : 'Saved'}
+          </button>
+
           <button
             onClick={() => setShowSearch(!showSearch)}
             className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
@@ -203,25 +217,29 @@ export default function FileEditor({ filePath, onClose, onSave }: FileEditorProp
             <Search size={16} />
           </button>
           
-          <button
-            onClick={() => setShowTools(!showTools)}
-            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-            title="More tools"
-          >
-            <MoreHorizontal size={16} />
-          </button>
+          {/* Tools Dropdown Trigger */}
+          <div className="relative">
+            <button
+              onClick={() => setShowTools(!showTools)}
+              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+              title="More tools"
+            >
+              <MoreHorizontal size={16} />
+            </button>
+            {/* Tools Dropdown Panel - will be positioned absolutely */}
+          </div>
           
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-700 rounded-lg transition-colors text-red-400"
-            title="Close"
+            className="p-2 hover:bg-gray-700 rounded-lg transition-colors text-gray-400 hover:text-red-400"
+            title="Close File"
           >
             <X size={16} />
           </button>
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search Bar - Unchanged for now, might be restyled later */}
       {showSearch && (
         <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
           <div className="flex items-center gap-3">
@@ -244,88 +262,111 @@ export default function FileEditor({ filePath, onClose, onSave }: FileEditorProp
         </div>
       )}
 
-      {/* Tools Panel */}
+      {/* Tools Dropdown Panel - Positioned absolutely relative to its trigger */}
       {showTools && (
-        <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Type size={16} className="text-gray-400" />
-              <span className="text-gray-400">Font Size:</span>
-              <button
-                onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-                className="p-1 hover:bg-gray-700 rounded"
-              >
-                <ZoomOut size={14} />
-              </button>
-              <span className="text-white min-w-[2rem] text-center">{fontSize}px</span>
-              <button
-                onClick={() => setFontSize(Math.min(24, fontSize + 2))}
-                className="p-1 hover:bg-gray-700 rounded"
-              >
-                <ZoomIn size={14} />
-              </button>
+        <div className="absolute top-12 right-4 z-20 bg-gray-700 border border-gray-600 rounded-lg shadow-xl p-3 w-64">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <label htmlFor="fontSize" className="text-gray-300">Font Size:</label>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setFontSize(Math.max(10, fontSize - 1))} className="p-1 hover:bg-gray-600 rounded"><ZoomOut size={14} /></button>
+                <span className="text-white w-8 text-center">{fontSize}px</span>
+                <button onClick={() => setFontSize(Math.min(30, fontSize + 1))} className="p-1 hover:bg-gray-600 rounded"><ZoomIn size={14} /></button>
+              </div>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between text-sm">
+              <label htmlFor="wordWrapToggle" className="text-gray-300">Word Wrap:</label>
               <input
                 type="checkbox"
-                id="wordWrap"
+                id="wordWrapToggle"
                 checked={wordWrap}
                 onChange={(e) => setWordWrap(e.target.checked)}
-                className="rounded"
+                className="form-checkbox h-4 w-4 text-blue-500 bg-gray-600 border-gray-500 rounded focus:ring-blue-400"
               />
-              <label htmlFor="wordWrap" className="text-gray-400">Word Wrap</label>
             </div>
             
             <button
-              onClick={handleCopy}
-              className="flex items-center gap-2 px-3 py-1 hover:bg-gray-700 rounded-lg transition-colors"
+              onClick={() => { handleCopy(); setShowTools(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-200 hover:bg-gray-600 rounded-md transition-colors"
             >
               <Copy size={14} />
-              Copy All
+              Copy All Content
             </button>
             
             <button
-              onClick={handleDownload}
-              className="flex items-center gap-2 px-3 py-1 hover:bg-gray-700 rounded-lg transition-colors"
+              onClick={() => { handleDownload(); setShowTools(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-200 hover:bg-gray-600 rounded-md transition-colors"
             >
               <Download size={14} />
-              Download
+              Download File
             </button>
           </div>
         </div>
       )}
 
-      {/* File Info Bar */}
-      <div className="bg-gray-800 border-b border-gray-700 px-4 py-1.5 flex items-center justify-between text-sm">
-        <div className="flex items-center gap-4">
-          <span className="text-gray-400">
-            Language: <span className="text-white">{language}</span>
-          </span>
-          <span className="text-gray-400">
-            Lines: <span className="text-white">{lineCount}</span>
-          </span>
-          <span className="text-gray-400">
-            Characters: <span className="text-white">{content.length}</span>
-          </span>
+      {/* Code Editor Area (includes line numbers and textarea) */}
+      <div className="flex-1 relative overflow-hidden" onKeyDown={handleKeyDown}> {/* Moved onKeyDown here */}
+        {/* Editor Content (Line numbers + Textarea) */}
+        <div className="absolute inset-0 flex">
+          {/* Line Numbers */}
+          <div 
+            className="bg-gray-800 border-r border-gray-700/50 px-2 py-4 text-gray-500 text-right font-mono select-none flex-shrink-0 sticky top-0 h-full overflow-y-hidden"
+            style={{ fontSize: `${Math.max(fontSize - 2, 10)}px`, lineHeight: '1.57' }} // Adjusted line height for better alignment
+            ref={(el) => { // Sync scroll with textarea
+              if (el && textareaRef.current) {
+                textareaRef.current.onscroll = () => {
+                  el.scrollTop = textareaRef.current!.scrollTop;
+                };
+              }
+            }}
+          >
+            {content.split('\n').map((_, index) => (
+              <div key={index} className="h-[25px]"> {/* Approximate height of a line */}
+                {index + 1}
+              </div>
+            ))}
+          </div>
+          
+          {/* Editor Textarea */}
+          <textarea
+            ref={textareaRef}
+            value={content}
+            onChange={(e) => handleContentChange(e.target.value)}
+            className={`flex-1 bg-gray-900 text-gray-100 p-4 font-mono resize-none focus:outline-none custom-scrollbar ${
+              wordWrap ? 'whitespace-pre-wrap break-all' : 'whitespace-pre overflow-x-auto' // `whitespace-pre` for tabs/spaces
+            }`}
+            style={{ 
+              fontSize: `${fontSize}px`,
+              lineHeight: '1.57', // Match line number div
+              tabSize: 2, // Standard tab size
+              WebkitTabSize: 2, // For Safari/Chrome
+              MozTabSize: 2, // For Firefox
+              OTabSize: 2, // For Opera
+            }}
+            placeholder="Start typing your code..."
+            spellCheck={false}
+            // onKeyDown moved to parent div to capture Ctrl+S even when textarea not focused
+          />
         </div>
-        
-        <button
-          onClick={handleSave}
-          disabled={!isDirty}
-          className={`flex items-center gap-2 px-4 py-1 rounded-lg text-sm font-medium transition-colors ${
-            isDirty 
-              ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-              : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          <Save size={14} />
-          {isDirty ? 'Save (Ctrl+S)' : 'Saved'}
-        </button>
       </div>
-
-      {/* Code Editor */}
-      <div className="flex-1 relative overflow-hidden">
+      
+      {/* Status Bar */}
+      <div className="bg-gray-800 border-t border-gray-700 px-4 py-1.5 flex items-center justify-between text-xs text-gray-400">
+        <div className="flex items-center gap-4">
+          <span>Ln {content.substring(0, textareaRef.current?.selectionStart || 0).split('\n').length}, Col {(textareaRef.current?.selectionStart || 0) - content.lastIndexOf('\n', (textareaRef.current?.selectionStart || 1) -1 ) }</span>
+          <span>{language}</span>
+          <span>Lines: {lineCount}</span>
+          <span>Chars: {content.length}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span>UTF-8</span>
+          {/* Add other status indicators like Git branch if needed */}
+        </div>
+      </div>
+    </div>
+  );
+}
         <div className="absolute inset-0 flex">
           {/* Line Numbers */}
           <div 

@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useProjectStore, initializeSampleProjects } from '@/store/projectStore';
 import { useBranchStore, Branch } from '@/store/branchStore';
-import BranchSelector from './BranchSelector';
 import { 
   Folder, 
   File, 
@@ -203,8 +202,8 @@ export default function ProjectExplorer({ onFileSelect, currentBranch }: Project
     return (
       <div key={node.path}>
         <div 
-          className="flex items-center px-3 py-2 hover:bg-gray-700 cursor-pointer select-none group"
-          style={{ paddingLeft: `${12 + indent}px` }}
+          className="flex items-center px-2 py-1.5 hover:bg-gray-700/70 rounded-md cursor-pointer select-none group mx-1"
+          style={{ paddingLeft: `${8 + indent}px` }} // Slightly reduced base padding
           onClick={() => {
             if (node.type === 'folder') {
               toggleFolder(node.path);
@@ -213,32 +212,33 @@ export default function ProjectExplorer({ onFileSelect, currentBranch }: Project
             }
           }}
         >
-          {node.type === 'folder' && (
-            <span className="mr-2">
-              {node.expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-            </span>
+          {node.type === 'folder' ? (
+            node.expanded ? <ChevronDown size={16} className="mr-1.5 text-gray-400 flex-shrink-0" /> : <ChevronRight size={16} className="mr-1.5 text-gray-400 flex-shrink-0" />
+          ) : (
+            <div className="w-[16px] mr-1.5 flex-shrink-0"></div> // Placeholder for alignment
           )}
           
           {node.type === 'folder' ? (
-            <Folder size={18} className="mr-3 text-blue-400 flex-shrink-0" />
+            <Folder size={16} className="mr-1.5 text-sky-400 flex-shrink-0" />
           ) : (
-            <span className="mr-3 flex-shrink-0">{getFileIcon(node.name)}</span>
+            <span className="mr-1.5 flex-shrink-0">{getFileIcon(node.name)}</span>
           )}
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center">
-              <span className={`text-sm truncate ${node.isNew ? 'text-green-400' : 'text-gray-100'}`}>
+              <span className={`text-sm truncate ${node.isNew ? 'text-green-400 font-medium' : 'text-gray-200 group-hover:text-white'}`}>
                 {node.name}
               </span>
               {node.isNew && (
-                <span className="ml-2 text-xs bg-green-600 text-white px-1.5 py-0.5 rounded">NEW</span>
+                <span className="ml-1.5 text-[10px] bg-green-500/30 text-green-300 px-1 py-0.5 rounded-sm font-medium">NEW</span>
               )}
             </div>
+            {/* Optional: File size display, could be a tooltip or secondary info
             {node.type === 'file' && node.size && (
-              <div className="text-xs text-gray-400 truncate">
+              <div className="text-xs text-gray-500 truncate">
                 {(node.size / 1024).toFixed(1)} KB
               </div>
-            )}
+            )} */}
           </div>
         </div>
         
@@ -255,55 +255,49 @@ export default function ProjectExplorer({ onFileSelect, currentBranch }: Project
   const filteredFiles = filterFiles(fileTree, searchQuery);
 
   return (
-    <div className="flex flex-col h-full bg-gray-800">
+    <div className="flex flex-col h-full bg-gray-800 text-white">
       {/* Header */}
-      <div className="flex-shrink-0 p-4 border-b border-gray-700">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-white">Files</h2>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-            title="Upload files"
-          >
-            <Upload size={18} className="text-gray-400" />
-          </button>
+      <div className="flex-shrink-0 p-3 border-b border-gray-700 space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Project Files</h2>
+          {/* Action Icons Group */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setShowNewFileModal(true)}
+              className="p-1.5 hover:bg-gray-700 rounded-md transition-colors"
+              title="New File"
+            >
+              <FilePlus size={16} className="text-gray-300 hover:text-white" />
+            </button>
+            <button
+              onClick={() => setShowNewFolderModal(true)}
+              className="p-1.5 hover:bg-gray-700 rounded-md transition-colors"
+              title="New Folder"
+            >
+              <FolderPlus size={16} className="text-gray-300 hover:text-white" />
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="p-1.5 hover:bg-gray-700 rounded-md transition-colors"
+              title="Upload Files"
+            >
+              <Upload size={16} className="text-gray-300 hover:text-white" />
+            </button>
+          </div>
         </div>
         
-        {/* Branch Selector */}
-        <div className="mb-3">
-          <BranchSelector />
-        </div>
-        
-        {/* Search */}
-        <div className="relative mb-3">
-          <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        {/* Search Input */}
+        <div className="relative">
+          <Search size={16} className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search files..."
-            className="w-full bg-gray-700 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500 text-white"
+            className="w-full bg-gray-700 border border-gray-600 rounded-md pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           />
         </div>
-        
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          <button 
-            onClick={() => setShowNewFileModal(true)}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors"
-          >
-            <FilePlus size={14} />
-            New File
-          </button>
-          
-          <button 
-            onClick={() => setShowNewFolderModal(true)}
-            className="flex items-center gap-2 px-3 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors"
-          >
-            <FolderPlus size={14} />
-            Folder
-          </button>
-        </div>
+      </div>
 
         {/* Upload Progress */}
         {uploadProgress.length > 0 && (
@@ -361,9 +355,12 @@ export default function ProjectExplorer({ onFileSelect, currentBranch }: Project
 
       {/* New File Modal */}
       {showNewFileModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 border border-gray-600 rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4 text-white">Create New File</h3>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 border border-gray-600 rounded-lg p-6 w-full max-w-md shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-white">Create New File</h3>
+              <button onClick={() => setShowNewFileModal(false)} className="text-gray-400 hover:text-white"><FilePlus size={14} /> {/* Using XCircle from BranchManagementView for consistency */}</button>
+            </div>
             <input
               type="text"
               value={newFileName}
@@ -372,23 +369,23 @@ export default function ProjectExplorer({ onFileSelect, currentBranch }: Project
                 if (e.key === 'Enter') createNewFile();
                 if (e.key === 'Escape') setShowNewFileModal(false);
               }}
-              placeholder="Enter file name (e.g., script.js, style.css)"
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 mb-4 text-white"
+              placeholder="Enter file name (e.g., script.js)"
+              className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 mb-4 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               autoFocus
             />
-            <div className="flex gap-3 justify-end">
+            <div className="flex gap-3 justify-end mt-5">
               <button
                 onClick={() => setShowNewFileModal(false)}
-                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                className="px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-md transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={createNewFile}
                 disabled={!newFileName.trim()}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-md transition-colors"
               >
-                Create
+                Create File
               </button>
             </div>
           </div>
@@ -397,9 +394,12 @@ export default function ProjectExplorer({ onFileSelect, currentBranch }: Project
 
       {/* New Folder Modal */}
       {showNewFolderModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 border border-gray-600 rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4 text-white">Create New Folder</h3>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 border border-gray-600 rounded-lg p-6 w-full max-w-md shadow-xl">
+             <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-white">Create New Folder</h3>
+                <button onClick={() => setShowNewFolderModal(false)} className="text-gray-400 hover:text-white"><FolderPlus size={14} /></button>
+            </div>
             <input
               type="text"
               value={newFolderName}
@@ -409,22 +409,22 @@ export default function ProjectExplorer({ onFileSelect, currentBranch }: Project
                 if (e.key === 'Escape') setShowNewFolderModal(false);
               }}
               placeholder="Enter folder name"
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 mb-4 text-white"
+              className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 mb-4 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               autoFocus
             />
-            <div className="flex gap-3 justify-end">
+            <div className="flex gap-3 justify-end mt-5">
               <button
                 onClick={() => setShowNewFolderModal(false)}
-                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                className="px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-md transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={createNewFolder}
                 disabled={!newFolderName.trim()}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-md transition-colors"
               >
-                Create
+                Create Folder
               </button>
             </div>
           </div>
