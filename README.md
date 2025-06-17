@@ -18,7 +18,7 @@ A Python-based GitHub App that provides AI-powered code assistance, similar to M
 
 - Python 3.8+
 - GitHub App (you'll need to create one)
-- OpenAI API key (or configure alternative AI provider)
+- Internet connection (uses free Pollinations.ai API)
 
 ### 1. Clone the Repository
 
@@ -76,7 +76,7 @@ GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
 Your private key content here
 -----END RSA PRIVATE KEY-----"
 GITHUB_WEBHOOK_SECRET=your_webhook_secret
-OPENAI_API_KEY=sk-your_openai_api_key
+AI_MODEL=openai
 ```
 
 ### 5. Configure Server Settings (Optional)
@@ -161,7 +161,14 @@ Once installed, you can interact with Coder Bot by:
 
 ### AI Providers
 
-Currently supports OpenAI GPT models. You can extend support for other providers by modifying `bot/ai_client.py`.
+Uses **Pollinations.ai** (free API) with support for multiple models:
+- `openai` - GPT-like model (default)
+- `openai-fast` - Faster GPT variant  
+- `qwen-coder` - Specialized coding model
+- `llama` - Meta's Llama model
+- `mistral` - Mistral AI model
+
+Change the model by setting `AI_MODEL=model_name` in your `.env` file.
 
 ### Database
 
@@ -285,7 +292,8 @@ pytest tests/
 | `GITHUB_APP_ID` | Your GitHub App ID | Yes |
 | `GITHUB_PRIVATE_KEY` | GitHub App private key | Yes |
 | `GITHUB_WEBHOOK_SECRET` | Webhook secret for verification | Yes |
-| `OPENAI_API_KEY` | OpenAI API key | Yes |
+| `AI_MODEL` | Pollinations.ai model (openai, qwen-coder, etc.) | No |
+| `AI_TIMEOUT` | AI request timeout in seconds | No |
 | `FLASK_SECRET_KEY` | Flask session secret | Yes |
 | `PORT` | Server port (default: 8080) | No |
 | `FLASK_DEBUG` | Enable debug mode | No |

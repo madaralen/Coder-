@@ -1,42 +1,40 @@
 """
 AI Client for Coder Bot
-Handles AI/LLM interactions for generating responses
+Handles AI/LLM interactions using Pollinations.ai (free API)
 """
 
 import os
 import json
+import requests
+import time
 from typing import Dict, List, Optional, Any
 import structlog
-
-# Import OpenAI client (can be replaced with other providers)
-try:
-    import openai
-    HAS_OPENAI = True
-except ImportError:
-    HAS_OPENAI = False
 
 logger = structlog.get_logger()
 
 
 class AIClient:
-    """Handles AI/LLM interactions"""
+    """Handles AI/LLM interactions using Pollinations.ai"""
     
     def __init__(self):
-        self.provider = os.getenv('AI_PROVIDER', 'openai')
-        self.model = os.getenv('AI_MODEL', 'gpt-4')
+        self.base_url = "https://text.pollinations.ai"
+        self.available_models = [
+            'openai',
+            'openai-fast', 
+            'qwen-coder',
+            'llama',
+            'mistral'
+        ]
+        self.default_model = os.getenv('AI_MODEL', 'openai')
+        self.timeout = int(os.getenv('AI_TIMEOUT', '30'))
         
-        if self.provider == 'openai':
-            if not HAS_OPENAI:
-                raise ImportError("OpenAI package not installed. Run: pip install openai")
-            
-            api_key = os.getenv('OPENAI_API_KEY')
-            if not api_key:
-                raise ValueError("OPENAI_API_KEY environment variable not set")
-            
-            self.client = openai.OpenAI(api_key=api_key)
-        else:
-            # Can add support for other providers (Anthropic, local models, etc.)
-            raise ValueError(f"Unsupported AI provider: {self.provider}")
+        # Optional pollinations settings
+        self.token = os.getenv('POLLINATIONS_TOKEN', '')
+        self.referrer = os.getenv('POLLINATIONS_REFERRER', '')
+        
+        logger.info("Initialized Pollinations AI client", 
+                   models=self.available_models, 
+                   default_model=self.default_model)
     
     def generate_response(self, messages: List[Dict[str, Any]], 
                          repo_context: Dict[str, Any],
@@ -49,11 +47,8 @@ class AIClient:
             # Convert messages to AI format
             ai_messages = self._format_messages_for_ai(messages, system_prompt)
             
-            # Generate response
-            if self.provider == 'openai':
-                response = self._generate_openai_response(ai_messages)
-            else:
-                raise ValueError(f"Unsupported provider: {self.provider}")
+            # Generate response using pollinations
+            response = self._generate_pollinations_response(ai_messages)
             
             # Parse and structure response
             return self._parse_ai_response(response)
@@ -159,23 +154,79 @@ Remember: You're here to help make the development process smoother and more eff
         
         return ai_messages
     
-    def _generate_openai_response(self, messages: List[Dict[str, str]]) -> str:
-        """Generate response using OpenAI"""
+    def _generate_pollinations_response(self, messages: List[Dict[str, str]], model: str = None) -> str:
+        """Generate response using Pollinations.ai"""
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                max_tokens=2000,
-                temperature=0.7,
-                presence_penalty=0.1,
-                frequency_penalty=0.1
+            # Use specified model or default
+            selected_model = model or self.default_model
+            
+            # Build the prompt from messages
+            prompt = self._build_prompt_from_messages(messages)
+            
+            # Prepare request headers
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': 'Coder-Bot/1.0'
+            }
+            
+            if self.token:
+                headers['Authorization'] = f'Bearer {self.token}'
+            
+            if self.referrer:
+                headers['Referer'] = self.referrer
+            
+            # Prepare request data
+            data = {
+                'messages': [{'role': 'user', 'content': prompt}],
+                'model': selected_model,
+                'jsonMode': False,
+                'temperature': 0.7,
+                'maxTokens': 2000
+            }
+            
+            # Make request to pollinations API
+            response = requests.post(
+                f"{self.base_url}/{selected_model}",
+                headers=headers,
+                json=data,
+                timeout=self.timeout
             )
             
-            return response.choices[0].message.content
+            if response.status_code == 200:
+                return response.text
+            else:
+                logger.error("Pollinations API error", 
+                           status_code=response.status_code, 
+                           response=response.text)
+                # Try with a different model if the first one fails
+                if selected_model != 'openai' and selected_model in self.available_models:
+                    logger.info("Retrying with openai model")
+                    return self._generate_pollinations_response(messages, 'openai')
+                raise Exception(f"API request failed: {response.status_code}")
             
+        except requests.exceptions.Timeout:
+            logger.error("Pollinations API timeout")
+            raise Exception("Request timed out")
         except Exception as e:
-            logger.exception("OpenAI API error", error=str(e))
+            logger.exception("Pollinations API error", error=str(e))
             raise
+    
+    def _build_prompt_from_messages(self, messages: List[Dict[str, str]]) -> str:
+        """Build a single prompt from message history"""
+        prompt_parts = []
+        
+        for message in messages:
+            role = message.get('role', 'user')
+            content = message.get('content', '')
+            
+            if role == 'system':
+                prompt_parts.append(f"System: {content}")
+            elif role == 'assistant':
+                prompt_parts.append(f"Assistant: {content}")
+            else:
+                prompt_parts.append(f"User: {content}")
+        
+        return "\n\n".join(prompt_parts)
     
     def _parse_ai_response(self, response: str) -> Dict[str, Any]:
         """Parse AI response and extract actions"""
@@ -229,14 +280,9 @@ Please provide:
 
 Keep your response concise but helpful."""
 
-            if self.provider == 'openai':
-                response = self.client.chat.completions.create(
-                    model=self.model,
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=1000,
-                    temperature=0.5
-                )
-                return response.choices[0].message.content
+            # Use pollinations API
+            messages = [{"role": "user", "content": prompt}]
+            return self._generate_pollinations_response(messages, 'qwen-coder')
             
         except Exception as e:
             logger.exception("Failed to generate issue analysis", error=str(e))
@@ -270,14 +316,9 @@ Please provide:
 
 Be constructive and helpful in your feedback."""
 
-            if self.provider == 'openai':
-                response = self.client.chat.completions.create(
-                    model=self.model,
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=1500,
-                    temperature=0.6
-                )
-                return response.choices[0].message.content
+            # Use pollinations API
+            messages = [{"role": "user", "content": prompt}]
+            return self._generate_pollinations_response(messages, 'openai')
             
         except Exception as e:
             logger.exception("Failed to generate PR review", error=str(e))
@@ -306,15 +347,11 @@ Please provide:
 
 If you're suggesting a complete file replacement or creation, format it as an action."""
 
-            if self.provider == 'openai':
-                response = self.client.chat.completions.create(
-                    model=self.model,
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=2000,
-                    temperature=0.5
-                )
-                
-                return self._parse_ai_response(response.choices[0].message.content)
+            # Use pollinations API
+            messages = [{"role": "user", "content": prompt}]
+            response = self._generate_pollinations_response(messages, 'qwen-coder')
+            
+            return self._parse_ai_response(response)
             
         except Exception as e:
             logger.exception("Failed to generate code suggestion", error=str(e))

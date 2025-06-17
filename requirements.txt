@@ -18,8 +18,8 @@ python-dotenv==1.0.1
 # Logging
 structlog==24.4.0
 
-# AI/LLM integration (OpenAI as example)
-openai==1.57.0
+# AI/LLM integration (Pollinations.ai - free API)
+# No additional dependencies needed - uses standard requests
 
 # Background tasks
 celery==5.4.0
