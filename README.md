@@ -79,15 +79,40 @@ GITHUB_WEBHOOK_SECRET=your_webhook_secret
 OPENAI_API_KEY=sk-your_openai_api_key
 ```
 
-### 5. Run the Application
+### 5. Configure Server Settings (Optional)
+
+The bot includes a `server.yml` configuration file to customize the web panel:
+
+```yaml
+server:
+  host: "0.0.0.0"        # Server address
+  port: 8080             # Server port
+  debug: false           # Debug mode
+  workers: 1             # Worker threads
+
+web_panel:
+  title: "Coder Bot Dashboard"  # Dashboard title
+  refresh_interval: 30          # Auto-refresh (seconds)
+  max_conversations_display: 10 # Max conversations shown
+
+security:
+  enable_https: false    # Enable HTTPS
+  ssl_cert_path: ""      # SSL certificate path
+  ssl_key_path: ""       # SSL key path
+  enable_cors: true      # Enable CORS
+```
+
+You can customize these settings based on your deployment needs.
+
+### 6. Run the Application
 
 ```bash
 python main.py
 ```
 
-The bot will start on `http://localhost:8080` by default.
+The bot will start on the configured host and port (default: `http://localhost:8080`).
 
-### 6. Install the App
+### 7. Install the App
 
 1. Go to your GitHub App settings
 2. Click "Install App"
@@ -153,6 +178,8 @@ Ensure your webhook URL is publicly accessible. For local development, use tools
 ```
 coder-bot/
 ├── main.py                 # Application entry point
+├── server.yml              # Server configuration
+├── .env.example            # Environment variables template
 ├── bot/
 │   ├── __init__.py
 │   ├── github_app.py       # GitHub App integration
@@ -160,9 +187,16 @@ coder-bot/
 │   ├── ai_client.py        # AI/LLM integration
 │   ├── database.py         # Database operations
 │   └── web_dashboard.py    # Web interface
-├── templates/              # HTML templates
-├── static/                 # Static assets
-└── requirements.txt        # Python dependencies
+├── templates/              # HTML templates for dashboard
+│   ├── base.html
+│   ├── dashboard.html
+│   ├── conversation.html
+│   ├── installations.html
+│   ├── logs.html
+│   └── error.html
+├── static/                 # Static assets (CSS, JS, images)
+├── requirements.txt        # Python dependencies
+└── Dockerfile             # Container deployment
 ```
 
 ### Key Components

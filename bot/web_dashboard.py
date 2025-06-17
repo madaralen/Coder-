@@ -13,7 +13,7 @@ from .conversation_manager import ConversationManager
 logger = structlog.get_logger()
 
 
-def create_dashboard_routes(app, db_manager: DatabaseManager, conversation_manager: ConversationManager):
+def create_dashboard_routes(app, db_manager: DatabaseManager, conversation_manager: ConversationManager, server_config: dict):
     """Create dashboard routes for the Flask app"""
     
     @app.route('/dashboard')
@@ -24,7 +24,8 @@ def create_dashboard_routes(app, db_manager: DatabaseManager, conversation_manag
             stats = db_manager.get_statistics()
             
             # Get recent conversations
-            recent_conversations = db_manager.get_active_conversations(limit=10)
+            max_display = server_config['web_panel']['max_conversations_display']
+            recent_conversations = db_manager.get_active_conversations(limit=max_display)
             
             # Format conversations for display
             formatted_conversations = []
@@ -43,7 +44,8 @@ def create_dashboard_routes(app, db_manager: DatabaseManager, conversation_manag
             
             return render_template('dashboard.html', 
                                  stats=stats, 
-                                 conversations=formatted_conversations)
+                                 conversations=formatted_conversations,
+                                 config=server_config)
                                  
         except Exception as e:
             logger.exception("Dashboard error", error=str(e))

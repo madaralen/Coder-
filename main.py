@@ -7,6 +7,7 @@ Similar to MentatBot functionality with repository interaction capabilities
 import os
 import logging
 import sqlite3
+import yaml
 from datetime import datetime
 from flask import Flask, request, jsonify, render_template
 from werkzeug.exceptions import BadRequest
@@ -17,6 +18,57 @@ from bot.github_app import GitHubApp
 from bot.conversation_manager import ConversationManager
 from bot.database import DatabaseManager
 from bot.web_dashboard import create_dashboard_routes
+
+# Load server configuration
+def load_server_config():
+    """Load server configuration from server.yml"""
+    config_file = "server.yml"
+    
+    # Default configuration
+    default_config = {
+        'server': {
+            'host': '0.0.0.0',
+            'port': 8080,
+            'debug': False,
+            'workers': 1
+        },
+        'web_panel': {
+            'title': 'Coder Bot Dashboard',
+            'refresh_interval': 30,
+            'max_conversations_display': 10,
+            'max_log_entries': 1000
+        },
+        'security': {
+            'enable_https': False,
+            'ssl_cert_path': '',
+            'ssl_key_path': '',
+            'enable_cors': True,
+            'cors_origins': ['http://localhost:3000', 'http://127.0.0.1:3000']
+        }
+    }
+    
+    try:
+        if os.path.exists(config_file):
+            with open(config_file, 'r') as f:
+                config = yaml.safe_load(f)
+                # Merge with defaults
+                for section in default_config:
+                    if section not in config:
+                        config[section] = default_config[section]
+                    else:
+                        for key in default_config[section]:
+                            if key not in config[section]:
+                                config[section][key] = default_config[section][key]
+                return config
+        else:
+            print(f"Configuration file {config_file} not found, using defaults")
+            return default_config
+    except Exception as e:
+        print(f"Error loading configuration: {e}, using defaults")
+        return default_config
+
+# Load configuration
+server_config = load_server_config()
 
 # Configure structured logging
 structlog.configure(
@@ -43,13 +95,22 @@ logger = structlog.get_logger()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'dev-key-change-in-production')
 
+# Configure CORS if enabled
+if server_config['security']['enable_cors']:
+    try:
+        from flask_cors import CORS
+        CORS(app, origins=server_config['security']['cors_origins'])
+        logger.info("CORS enabled", origins=server_config['security']['cors_origins'])
+    except ImportError:
+        logger.warning("flask-cors not installed, CORS not enabled")
+
 # Initialize components
 db_manager = DatabaseManager()
 github_app = GitHubApp()
 conversation_manager = ConversationManager(db_manager, github_app)
 
 # Register dashboard routes
-create_dashboard_routes(app, db_manager, conversation_manager)
+create_dashboard_routes(app, db_manager, conversation_manager, server_config)
 
 
 @app.route('/')
@@ -320,16 +381,32 @@ if __name__ == '__main__':
         initialize_environment()
         
         # Start the Flask application
-        port = int(os.getenv('PORT', 8080))
-        debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+        host = server_config['server']['host']
+        port = int(os.getenv('PORT', server_config['server']['port']))
+        debug = os.getenv('FLASK_DEBUG', str(server_config['server']['debug'])).lower() == 'true'
         
         logger.info(
             "Starting Coder Bot",
+            host=host,
             port=port,
-            debug=debug
+            debug=debug,
+            config_file="server.yml"
         )
         
-        app.run(host='0.0.0.0', port=port, debug=debug)
+        # Check for HTTPS configuration
+        if server_config['security']['enable_https']:
+            ssl_cert = server_config['security']['ssl_cert_path']
+            ssl_key = server_config['security']['ssl_key_path']
+            
+            if ssl_cert and ssl_key and os.path.exists(ssl_cert) and os.path.exists(ssl_key):
+                logger.info("Starting with HTTPS", cert=ssl_cert, key=ssl_key)
+                app.run(host=host, port=port, debug=debug, ssl_context=(ssl_cert, ssl_key))
+            else:
+                logger.error("HTTPS enabled but SSL files not found or invalid")
+                logger.info("Falling back to HTTP")
+                app.run(host=host, port=port, debug=debug)
+        else:
+            app.run(host=host, port=port, debug=debug)
         
     except Exception as e:
         logger.exception("Failed to start application", error=str(e))
