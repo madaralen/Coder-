@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Coder Bot Dashboard{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'gray-850': '#1f2937',
+                        'gray-925': '#111827'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom styles -->
+    <style>
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #374151;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #6b7280;
+            border-radius: 2px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 border-b border-gray-700 px-4 py-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-xl font-bold text-blue-400">🤖 {{ config.web_panel.title if config and config.web_panel else "Coder Bot Dashboard" }}</h1>
+                <div class="hidden md:flex space-x-4">
+                    <a href="/dashboard" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {% if request.endpoint == 'dashboard' %}bg-gray-700 text-white{% endif %}">
+                        Dashboard
+                    </a>
+                    <a href="/conversations" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        Conversations
+                    </a>
+                    <a href="/installations" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        Installations
+                    </a>
+                    <a href="/logs" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                        Logs
+                    </a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-400" id="current-time"></span>
+                <div class="w-2 h-2 bg-green-500 rounded-full" title="Bot Online"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 border-t border-gray-700 px-4 py-3 mt-8">
+        <div class="text-center text-gray-400 text-sm">
+            <p>&copy; 2025 Coder Bot - AI-powered GitHub Assistant</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString();
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Auto-refresh dashboard data
+        function refreshData() {
+            if (window.location.pathname === '/dashboard') {
+                fetch('/api/stats')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Update stats if elements exist
+                        const activeConvs = document.getElementById('active-conversations');
+                        if (activeConvs && data.conversations) {
+                            activeConvs.textContent = data.conversations.active;
+                        }
+                        
+                        const totalMessages = document.getElementById('total-messages');
+                        if (totalMessages && data.messages) {
+                            totalMessages.textContent = data.messages.total;
+                        }
+                    })
+                    .catch(error => console.error('Failed to refresh data:', error));
+            }
+        }
+
+        // Refresh based on config interval
+        const refreshInterval = {{ config.web_panel.refresh_interval if config and config.web_panel else 30 }} * 1000;
+        if (refreshInterval > 0) {
+            setInterval(refreshData, refreshInterval);
+        }
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

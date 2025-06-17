@@ -1,276 +1,328 @@
-# 🤖 AI Code Assistant
+# Coder Bot 🤖
 
-<div align="center">
+A Python-based GitHub App that provides AI-powered code assistance, similar to MentatBot. Coder Bot can interact with issues, pull requests, review code, create files, and help with various development tasks directly in your GitHub repositories.
 
-![AI Code Assistant](https://img.shields.io/badge/AI-Code%20Assistant-blue?style=for-the-badge&logo=robot)
-![Next.js](https://img.shields.io/badge/Next.js-15.3.3-black?style=for-the-badge&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)
-![React](https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react)
+## 🌟 Features
 
-**Your intelligent coding companion with real-time web search capabilities**
+- **AI-Powered Conversations**: Intelligent responses to issues, PRs, and comments
+- **Code Analysis**: Review and analyze code changes
+- **File Operations**: Create, update, and manage repository files
+- **Pull Request Management**: Create PRs and provide code reviews
+- **Repository Integration**: Full GitHub API integration
+- **Web Dashboard**: Monitor bot activity and conversations
+- **Multi-Repository Support**: Works across multiple repositories and organizations
 
-*Built by `tachiba11212`*
-
-[🚀 Live Demo](#) • [📖 Documentation](#features) • [🐛 Issues](https://github.com/tachiba11212/Web/issues) • [💡 Features](#features)
-
-</div>
-
----
-
-## ✨ Features
-
-### 🔧 **Smart Development**
-- **🤖 AI-Powered Code Generation**: Create complete projects from simple descriptions
-- **📝 Direct File Editing**: Modify existing files automatically with AI assistance
-- **🔍 Real-time Error Detection**: Automatically detect and fix code errors
-- **🌿 Branch Management**: Organized workflow with automatic branch creation
-
-### 🌐 **Web-Enhanced Intelligence**
-- **🔍 Live Web Search**: Automatically searches for latest documentation and solutions
-- **📚 Current Information**: Uses up-to-date examples and best practices
-- **🆕 Technology Updates**: Stays current with latest frameworks and libraries
-- **🔗 Smart Resource Finding**: Finds relevant Stack Overflow, GitHub, and documentation links
-
-### 🎯 **Intelligent Workflow**
-- **🎨 Project Creation**: `"create a React calculator"` → Complete project with files
-- **✏️ File Modification**: `"fix the login function"` → Direct code changes
-- **💬 Code Explanation**: `"explain this component"` → Detailed analysis of your codebase
-- **🔄 Auto Error Fixing**: Detects issues and applies fixes automatically
-
-### 🧠 **Advanced Memory System**
-- **📝 Short-term Memory**: Remembers recent conversations and changes
-- **🏛️ Long-term Memory**: Maintains project context across sessions
-- **🌳 Branch Context**: Each branch maintains its own chat and memory
-- **📊 Progress Tracking**: Real-time status updates with pause/resume functionality
-
----
-
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- npm, yarn, pnpm, or bun
 
-### Installation
+- Python 3.8+
+- GitHub App (you'll need to create one)
+- Internet connection (uses free Pollinations.ai API)
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/tachiba11212/Web.git
-   cd Web
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   yarn install
-   # or
-   pnpm install
-   # or
-   bun install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env.local
-   ```
-   
-   Configure your AI API settings in `.env.local`:
-   ```env
-   NEXT_PUBLIC_POLLINATIONS_API_URL=https://text.pollinations.ai/openai
-   NEXT_PUBLIC_AI_MODELS=openai,openai-fast,qwen-coder,llama,mistral
-   # Add your API tokens if required
-   NEXT_PUBLIC_POLLINATIONS_TOKEN=your_token_here
-   NEXT_PUBLIC_POLLINATIONS_REFERRER=your_domain_here
-   ```
-
-4. **Run the development server**
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   # or
-   pnpm dev
-   # or
-   bun dev
-   ```
-
-### 🧹 **Troubleshooting Cache Issues**
-
-If you encounter CSS parsing errors or build issues, try these cleanup commands:
+### 1. Clone the Repository
 
 ```bash
-# Clean all cache files and reinstall
-npm run fresh-install
-
-# Clean and start development server
-npm run fresh-dev
-
-# Manual cleanup (if needed)
-npm run clean
+git clone https://github.com/your-username/coder-bot.git
+cd coder-bot
 ```
 
-**Common issues and solutions:**
-- **CSS @import errors**: Run `npm run fresh-install` to clear build cache
-- **Module not found**: Delete `node_modules` and reinstall dependencies
-- **Build failures**: Clear `.next` folder and restart dev server
+### 2. Install Dependencies
 
-5. **Open your browser**
-   
-   Navigate to [http://localhost:3000](http://localhost:3000) to see the magic! ✨
-
----
-
-## 🎮 How to Use
-
-### 🆕 **Creating New Projects**
-```
-"create a simple Python calculator"
-"build a React todo app with TypeScript"
-"generate a Node.js API for user management"
-```
-→ Creates new branch with complete project structure
-
-### ✏️ **Editing Existing Code**
-```
-"fix the login function to handle errors"
-"add dark mode to the header component"
-"update the API to use async/await"
-```
-→ Modifies files directly in your current branch
-
-### 💬 **Getting Explanations**
-```
-"explain how this React hook works"
-"what does this Python function do?"
-"analyze the performance of this code"
-```
-→ Provides detailed analysis based on your entire codebase
-
-### 🔧 **Advanced Features**
-- **Web Search**: Ask about latest technologies - AI automatically searches for current info
-- **Error Fixing**: AI detects errors and applies fixes automatically
-- **Branch Switching**: Work on multiple features simultaneously
-- **Memory Context**: AI remembers your project history and preferences
-
----
-
-## 🏗️ Tech Stack
-
-| Technology | Purpose | Version |
-|------------|---------|---------|
-| ![Next.js](https://img.shields.io/badge/Next.js-black?logo=next.js) | React Framework | 15.3.3 |
-| ![TypeScript](https://img.shields.io/badge/TypeScript-blue?logo=typescript) | Type Safety | 5.x |
-| ![React](https://img.shields.io/badge/React-61DAFB?logo=react) | UI Library | 19.0 |
-| ![Tailwind](https://img.shields.io/badge/Tailwind-38B2AC?logo=tailwind-css) | Styling | 4.x |
-| ![Zustand](https://img.shields.io/badge/Zustand-orange) | State Management | 5.x |
-| ![Monaco](https://img.shields.io/badge/Monaco-007ACC?logo=visual-studio-code) | Code Editor | 4.7.0 |
-
----
-
-## 📁 Project Structure
-
-```
-src/
-├── app/                 # Next.js App Router
-│   ├── layout.tsx      # Root layout
-│   ├── page.tsx        # Main application
-│   └── globals.css     # Global styles
-├── components/         # React components
-│   ├── MainSection.tsx # AI chat interface
-│   ├── ProjectExplorer.tsx # File tree
-│   ├── FileEditor.tsx  # Code editor
-│   ├── BranchSelector.tsx # Git-like branches
-│   ├── Settings.tsx    # Configuration
-│   ├── Sidebar.tsx     # Navigation sidebar
-│   ├── StatusDetailModal.tsx # Status details
-│   ├── ImageProcessor.tsx # Image processing
-│   └── MultiImageChat.tsx # Multi-image chat
-├── store/             # State management
-│   ├── projectStore.ts # Project and file state
-│   └── branchStore.ts  # Branch and memory state
-├── hooks/             # Custom React hooks
-│   └── useSwipeGestures.ts # Touch gestures
-└── utils/             # Utility functions
-    └── codeGeneration.ts # AI response parsing
+```bash
+pip install -r requirements.txt
 ```
 
----
+### 3. Create a GitHub App
 
-## 🎨 Screenshots
+1. Go to GitHub Settings > Developer settings > GitHub Apps
+2. Click "New GitHub App"
+3. Fill in the basic information:
+   - **App name**: Coder Bot (or your preferred name)
+   - **Homepage URL**: Your deployment URL
+   - **Webhook URL**: `https://your-domain.com/webhook`
+   - **Webhook secret**: Generate a secure secret
 
-<div align="center">
+4. Set the following **Repository permissions**:
+   - Issues: Read & Write
+   - Pull requests: Read & Write
+   - Contents: Read & Write
+   - Metadata: Read
 
-### 💬 **AI Chat Interface**
-*Intelligent conversation with your code*
+5. Subscribe to these **events**:
+   - Issues
+   - Issue comments
+   - Pull requests
+   - Pull request reviews
+   - Pull request review comments
 
-### 📁 **Project Explorer** 
-*Visual file tree with real-time updates*
+6. Create the app and note down:
+   - App ID
+   - Generate and download the private key
 
-### ✏️ **Code Editor**
-*Monaco-powered editing experience*
+### 4. Configure Environment
 
-### 🌿 **Branch Management**
-*Git-like branching for organized development*
+Copy the example environment file and fill in your details:
 
-</div>
+```bash
+cp .env.example .env
+```
 
----
+Edit `.env` with your configuration:
+
+```env
+GITHUB_APP_ID=123456
+GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
+Your private key content here
+-----END RSA PRIVATE KEY-----"
+GITHUB_WEBHOOK_SECRET=your_webhook_secret
+AI_MODEL=openai
+```
+
+### 5. Configure Server Settings (Optional)
+
+The bot includes a `server.yml` configuration file to customize the web panel:
+
+```yaml
+server:
+  host: "0.0.0.0"        # Server address
+  port: 8080             # Server port
+  debug: false           # Debug mode
+  workers: 1             # Worker threads
+
+web_panel:
+  title: "Coder Bot Dashboard"  # Dashboard title
+  refresh_interval: 30          # Auto-refresh (seconds)
+  max_conversations_display: 10 # Max conversations shown
+
+security:
+  enable_https: false    # Enable HTTPS
+  ssl_cert_path: ""      # SSL certificate path
+  ssl_key_path: ""       # SSL key path
+  enable_cors: true      # Enable CORS
+```
+
+You can customize these settings based on your deployment needs.
+
+### 6. Run the Application
+
+```bash
+python main.py
+```
+
+The bot will start on the configured host and port (default: `http://localhost:8080`).
+
+### 7. Install the App
+
+1. Go to your GitHub App settings
+2. Click "Install App"
+3. Select the repositories you want to enable the bot for
+4. Grant the required permissions
+
+## 📊 Web Dashboard
+
+Access the web dashboard at `http://localhost:8080/dashboard` to:
+
+- Monitor active conversations
+- View bot statistics
+- Track agent actions
+- Review system logs
+- Manage installations
+
+## 🎯 Usage
+
+Once installed, you can interact with Coder Bot by:
+
+### In Issues
+- Mention `@your-bot-name` in issue comments
+- Create issues with keywords like "help", "bug", "implement"
+- The bot will analyze the issue and provide assistance
+
+### In Pull Requests
+- Mention `@your-bot-name` in PR comments or descriptions
+- The bot can review code changes and provide feedback
+- Ask for specific help with code improvements
+
+### Example Interactions
+
+```markdown
+@coder-bot can you help me implement a login system for this React app?
+```
+
+```markdown
+@coder-bot please review this code and suggest improvements
+```
+
+```markdown
+@coder-bot create a README file for this project
+```
+
+## 🔧 Configuration
+
+### AI Providers
+
+Uses **Pollinations.ai** (free API) with support for multiple models:
+- `openai` - GPT-like model (default)
+- `openai-fast` - Faster GPT variant  
+- `qwen-coder` - Specialized coding model
+- `llama` - Meta's Llama model
+- `mistral` - Mistral AI model
+
+Change the model by setting `AI_MODEL=model_name` in your `.env` file.
+
+### Database
+
+Uses SQLite by default. For production, consider using PostgreSQL or MySQL by updating the database configuration.
+
+### Webhooks
+
+Ensure your webhook URL is publicly accessible. For local development, use tools like:
+- [ngrok](https://ngrok.com/)
+- [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/)
+
+## 🏗️ Architecture
+
+```
+coder-bot/
+├── main.py                 # Application entry point
+├── server.yml              # Server configuration
+├── .env.example            # Environment variables template
+├── bot/
+│   ├── __init__.py
+│   ├── github_app.py       # GitHub App integration
+│   ├── conversation_manager.py  # Conversation handling
+│   ├── ai_client.py        # AI/LLM integration
+│   ├── database.py         # Database operations
+│   └── web_dashboard.py    # Web interface
+├── templates/              # HTML templates for dashboard
+│   ├── base.html
+│   ├── dashboard.html
+│   ├── conversation.html
+│   ├── installations.html
+│   ├── logs.html
+│   └── error.html
+├── static/                 # Static assets (CSS, JS, images)
+├── requirements.txt        # Python dependencies
+└── Dockerfile             # Container deployment
+```
+
+### Key Components
+
+- **GitHub App**: Handles authentication and API calls
+- **Conversation Manager**: Manages AI conversations and context
+- **AI Client**: Interfaces with language models
+- **Database Manager**: Stores conversations and bot state
+- **Web Dashboard**: Provides monitoring interface
+
+## 🚀 Deployment
+
+### Using Docker
+
+Create a `Dockerfile`:
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY . .
+
+EXPOSE 8080
+CMD ["python", "main.py"]
+```
+
+Build and run:
+
+```bash
+docker build -t coder-bot .
+docker run -p 8080:8080 --env-file .env coder-bot
+```
+
+### Using Heroku
+
+1. Create a Heroku app
+2. Set environment variables in Heroku dashboard
+3. Deploy using Git or GitHub integration
+
+### Using Railway/Render
+
+1. Connect your repository
+2. Set environment variables
+3. Deploy with automatic builds
+
+## 🛠️ Development
+
+### Running in Development Mode
+
+```bash
+export FLASK_DEBUG=True
+python main.py
+```
+
+### Adding New Features
+
+1. **New AI Capabilities**: Extend `bot/ai_client.py`
+2. **GitHub Integrations**: Modify `bot/github_app.py`
+3. **Webhook Events**: Add handlers in `main.py`
+4. **Dashboard Features**: Update `bot/web_dashboard.py`
+
+### Testing
+
+```bash
+# Install test dependencies
+pip install pytest pytest-cov
+
+# Run tests
+pytest tests/
+```
+
+## 🔒 Security
+
+- Webhook signatures are verified for all GitHub events
+- Private keys are stored securely in environment variables
+- Database connections use parameterized queries
+- API keys are never logged or exposed
+
+## 📝 Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `GITHUB_APP_ID` | Your GitHub App ID | Yes |
+| `GITHUB_PRIVATE_KEY` | GitHub App private key | Yes |
+| `GITHUB_WEBHOOK_SECRET` | Webhook secret for verification | Yes |
+| `AI_MODEL` | Pollinations.ai model (openai, qwen-coder, etc.) | No |
+| `AI_TIMEOUT` | AI request timeout in seconds | No |
+| `FLASK_SECRET_KEY` | Flask session secret | Yes |
+| `PORT` | Server port (default: 8080) | No |
+| `FLASK_DEBUG` | Enable debug mode | No |
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how you can help:
-
-1. **🍴 Fork the repository**
-2. **🌿 Create a feature branch** (`git checkout -b feature/amazing-feature`)
-3. **💾 Commit your changes** (`git commit -m 'Add amazing feature'`)
-4. **📤 Push to the branch** (`git push origin feature/amazing-feature`)
-5. **🔄 Open a Pull Request**
-
-### 🐛 Bug Reports
-Found a bug? [Open an issue](https://github.com/tachiba11212/Web/issues) with:
-- Clear description
-- Steps to reproduce
-- Expected vs actual behavior
-- Screenshots if applicable
-
----
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
 ## 📄 License
 
-This project is licensed under a Custom Restrictive License that allows:
-- ✅ Personal local usage and study
-- ✅ Submitting pull requests and contributions
-- ✅ Educational purposes
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-But **strictly prohibits**:
-- ❌ Modification or redistribution
-- ❌ Commercial use without permission  
-- ❌ Public hosting or providing as a service
-- ❌ Creating derivative works
+## 🙏 Acknowledgments
 
-See the [LICENSE](LICENSE) file for complete terms and conditions.
+- Inspired by [MentatBot](https://mentat.ai)
+- Built with [PyGithub](https://github.com/PyGithub/PyGithub)
+- Uses [OpenAI GPT](https://openai.com/api/) for AI capabilities
+- Web interface powered by [Flask](https://flask.palletsprojects.com/)
 
----
+## 📞 Support
 
-## 🌟 Acknowledgments
-
-- **AI Integration**: Powered by [Pollinations.ai](https://pollinations.ai)
-- **Code Editor**: [Monaco Editor](https://microsoft.github.io/monaco-editor/)
-- **Icons**: [Lucide React](https://lucide.dev)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com)
+- Create an issue for bug reports
+- Start a discussion for feature requests
+- Check the [wiki](../../wiki) for additional documentation
 
 ---
 
-<div align="center">
-
-**Built with ❤️ by `tachiba11212`**
-
-*Making coding more intelligent, one conversation at a time*
-
-[![GitHub stars](https://img.shields.io/github/stars/tachiba11212/Web?style=social)](https://github.com/tachiba11212/Web/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/tachiba11212/Web?style=social)](https://github.com/tachiba11212/Web/network/members)
-
-[⭐ Star this repo](https://github.com/tachiba11212/Web) • [🐛 Report Bug](https://github.com/tachiba11212/Web/issues) • [💡 Request Feature](https://github.com/tachiba11212/Web/issues)
-
-</div>
+Made with ❤️ for the developer community

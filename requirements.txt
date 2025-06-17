@@ -1,0 +1,35 @@
+# GitHub App and API
+PyGithub==2.4.0
+cryptography==43.0.1
+PyJWT==2.10.1
+
+# Web framework for dashboard and webhooks
+flask==3.1.0
+flask-cors==5.0.0
+
+# HTTP requests
+requests==2.32.3
+
+# Environment variables
+python-dotenv==1.0.1
+
+# Database (SQLite is built into Python)
+
+# Logging
+structlog==24.4.0
+
+# AI/LLM integration (Pollinations.ai - free API)
+# No additional dependencies needed - uses standard requests
+
+# Background tasks
+celery==5.4.0
+redis==5.2.0
+
+# Date/time handling
+python-dateutil==2.9.0.post0
+
+# YAML parsing (for server configuration)
+PyYAML==6.0.2
+
+# Markdown processing
+markdown==3.7

@@ -1,0 +1,55 @@
+# Coder Bot Server Configuration
+# Configure the web panel server settings
+
+server:
+  # Server host/address to bind to
+  # Use "0.0.0.0" to accept connections from any IP (recommended for production)
+  # Use "127.0.0.1" or "localhost" for local development only
+  host: "0.0.0.0"
+  
+  # Port number for the web panel
+  # Default: 8080
+  # Make sure this port is available and not blocked by firewall
+  port: 8080
+  
+  # Enable debug mode (development only)
+  # Set to false for production deployments
+  debug: false
+  
+  # Number of worker threads (for production)
+  # Increase for high-traffic deployments
+  workers: 1
+
+# Web Panel Configuration
+web_panel:
+  # Title displayed in the web dashboard
+  title: "Coder Bot Dashboard"
+  
+  # Auto-refresh interval for dashboard (in seconds)
+  # Set to 0 to disable auto-refresh
+  refresh_interval: 30
+  
+  # Maximum number of conversations to display on dashboard
+  max_conversations_display: 10
+  
+  # Maximum number of log entries to keep in memory
+  max_log_entries: 1000
+
+# Security Settings
+security:
+  # Enable HTTPS (requires SSL certificates)
+  enable_https: false
+  
+  # SSL certificate file path (if HTTPS enabled)
+  ssl_cert_path: ""
+  
+  # SSL private key file path (if HTTPS enabled)
+  ssl_key_path: ""
+  
+  # Enable CORS for API endpoints
+  enable_cors: true
+  
+  # Allowed origins for CORS (use ["*"] for all origins in development)
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://127.0.0.1:3000"
