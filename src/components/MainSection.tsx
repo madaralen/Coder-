@@ -433,12 +433,55 @@ What would you like me to help you build or fix today?`,
     setIsStatusModalOpen(true);
   };
 
+  const renderMessageContent = (message: Message) => {
+    // Enhanced Markdown rendering with components for code blocks
+    return (
+      <ReactMarkdown
+        components={{
+          code({ node, inline, className, children, ...props }) {
+            const match = /language-(\w+)/.exec(className || '');
+            const lang = match ? match[1] : 'text';
+            const codeString = String(children).replace(/\n$/, '');
+            return !inline ? (
+              <div className="my-2 bg-gray-900 rounded-md overflow-hidden">
+                <div className="flex items-center justify-between px-3 py-1.5 bg-gray-700 text-xs text-gray-300">
+                  <span>{lang}</span>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(codeString)}
+                    className="text-xs hover:text-white transition-colors"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre className="p-3 text-sm overflow-x-auto"><code className={`language-${lang}`} {...props}>{children}</code></pre>
+              </div>
+            ) : (
+              <code className="bg-gray-700 px-1 py-0.5 rounded-sm text-sm" {...props}>
+                {children}
+              </code>
+            );
+          },
+          p(props) { return <p className="mb-1 last:mb-0" {...props} />; },
+          ul(props) { return <ul className="list-disc list-inside mb-2 pl-2" {...props} />; },
+          ol(props) { return <ol className="list-decimal list-inside mb-2 pl-2" {...props} />; },
+          li(props) { return <li className="mb-0.5" {...props} />; },
+          h1(props) { return <h1 className="text-xl font-semibold my-2" {...props} />; },
+          h2(props) { return <h2 className="text-lg font-semibold my-1.5" {...props} />; },
+          h3(props) { return <h3 className="text-md font-semibold my-1" {...props} />; },
+          a(props) { return <a className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />; }
+        }}
+      >
+        {message.content}
+      </ReactMarkdown>
+    );
+  };
+
 
   const handleExplanationRequest = async (input: string) => {
     // For explanations, provide direct responses without status messages
     try {
       const explanationPayload = {
-        model: 'openai',
+        model: 'openai', // Consider using settings.aiModel
         messages: [
           {
             role: 'system',
@@ -499,9 +542,9 @@ What would you like me to help you build or fix today?`,
     } catch (error) {
       console.error('Explanation error:', error);
       const errorMessage: Message = {
-        id: `${Date.now()}-error`,
-        type: 'ai',
-        content: `I apologize, but I encountered an error while generating the explanation: ${error instanceof Error ? error.message : 'Unknown error'}. Please try rephrasing your question.`,
+        id: `${Date.now()}-error-explanation`, // Unique ID for error message
+        type: 'ai', // Or a new 'error' type if we want to style it differently
+        content: `⚠️ I apologize, but I encountered an error while generating the explanation: ${error instanceof Error ? error.message : 'Unknown error'}. Please try rephrasing your question.`,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -686,147 +729,128 @@ What would you like me to help you build or fix today?`,
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="p-4 space-y-4">
-          {messages.map((message) => (
-            <div key={message.id} className="flex gap-3">
-              <div className="flex-shrink-0">
-                {message.type === 'user' ? (
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
-                  </div>
-                ) : message.type === 'status' ? (
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    message.status?.type === 'analyzing' ? 'bg-blue-600' :
-                    message.status?.type === 'generating' ? 'bg-purple-600' :
-                    message.status?.type === 'running' ? 'bg-green-600' :
-                    message.status?.type === 'fixing' ? 'bg-yellow-600' :
-                    message.status?.type === 'completed' ? 'bg-green-600' :
-                    message.status?.type === 'error' ? 'bg-red-600' : 'bg-gray-600'
-                  }`}>
-                    {message.status?.type === 'analyzing' ? <Search className="w-4 h-4 text-white" /> :
-                     message.status?.type === 'generating' ? <Code className="w-4 h-4 text-white" /> :
-                     message.status?.type === 'running' ? <Play className="w-4 h-4 text-white" /> :
-                     message.status?.type === 'fixing' ? <AlertCircle className="w-4 h-4 text-white" /> :
-                     message.status?.type === 'completed' ? <CheckCircle className="w-4 h-4 text-white" /> :
-                     message.status?.type === 'error' ? <AlertCircle className="w-4 h-4 text-white" /> :
-                     <Loader2 className="w-4 h-4 text-white animate-spin" />}
-                  </div>
-                ) : (
-                  <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-white" />
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <div className={`card-glass p-4 rounded-lg ${
-                  message.type === 'status' ? 'cursor-pointer hover:bg-gray-700/50 transition-colors' : ''
-                }`} onClick={message.status ? () => handleStatusClick(message.status!) : undefined}>
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6">
+        {messages.map((message) => (
+          <div 
+            key={message.id} 
+            className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            {/* Message content wrapper */}
+            <div className={`flex flex-col ${message.type === 'user' ? 'items-end' : 'items-start'}`}>
+              <div className={`flex items-end gap-2.5 max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl ${message.type === 'user' ? 'flex-row-reverse' : ''}`}>
+                {/* Avatar */}
+                <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-white shadow
+                  ${message.type === 'user' ? 'bg-indigo-500' 
+                    : message.type === 'status' && message.status?.type === 'error' ? 'bg-red-500' 
+                    : message.type === 'status' ? 'bg-gray-500'
+                    : 'bg-teal-600'}`}>
+                  {message.type === 'user' ? <User size={18} /> 
+                    : message.type === 'status' && message.status?.type === 'error' ? <AlertCircle size={18}/> 
+                    : message.type === 'status' && message.status?.type === 'analyzing' ? <Search size={18} />
+                    : message.type === 'status' && message.status?.type === 'generating' ? <Code size={18} />
+                    : message.type === 'status' && message.status?.type === 'running' ? <Play size={18} />
+                    : message.type === 'status' && message.status?.type === 'fixing' ? <Settings size={18} />
+                    : message.type === 'status' && message.status?.type === 'completed' ? <CheckCircle size={18} />
+                    : <Bot size={18} />}
+                </div>
+
+                {/* Message bubble */}
+                <div className={`px-4 py-3 rounded-2xl break-words shadow-lg
+                  ${message.type === 'user' 
+                    ? 'bg-blue-600 text-white rounded-br-none' 
+                    : message.type === 'ai' 
+                      ? 'bg-gray-700 text-gray-100 rounded-bl-none' 
+                      : message.type === 'status' && message.status?.type === 'error'
+                        ? 'bg-red-700/80 border border-red-500/70 text-red-100 rounded-lg w-full' // Status error messages full width, distinct
+                        : 'bg-gray-600/70 border border-gray-500/60 text-gray-200 rounded-lg w-full' // Status messages full width
+                }`}>
                   {message.type === 'status' ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className={`font-medium ${
-                          message.status?.type === 'error' ? 'text-red-400' :
-                          message.status?.type === 'completed' ? 'text-green-400' :
-                          'text-blue-400'
-                        }`}>
-                          {message.content}
-                        </span>
-                        <span className="text-xs text-gray-400">
-                          Click for details
-                        </span>
+                    <div 
+                      className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => message.status && handleStatusClick(message.status)}
+                    >
+                      {/* Icon already handled by avatar above for status messages */}
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-sm">{message.status?.title || message.content}</span>
+                        {message.status?.description && <span className="text-xs opacity-80 mt-0.5">{message.status.description}</span>}
+                        {message.status?.progress !== undefined && (
+                            <div className="mt-2 flex items-center gap-2">
+                                <div className="flex-1 bg-gray-500/50 rounded-full h-1.5">
+                                <div 
+                                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                                    message.status.type === 'error' ? 'bg-red-400' :
+                                    message.status.type === 'completed' ? 'bg-green-400' :
+                                    'bg-blue-400'
+                                    }`}
+                                    style={{ width: `${message.status.progress}%` }}
+                                />
+                                </div>
+                                <span className="text-xs text-gray-400">{message.status.progress}%</span>
+                            </div>
+                        )}
                       </div>
-                      {message.status?.progress !== undefined && (
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 bg-gray-700 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full transition-all duration-300 ${
-                                message.status.type === 'error' ? 'bg-red-500' :
-                                message.status.type === 'completed' ? 'bg-green-500' :
-                                'bg-blue-500'
-                              }`}
-                              style={{ width: `${message.status.progress}%` }}
-                            />
-                          </div>
-                          <span className="text-xs text-gray-400">{message.status.progress}%</span>
-                        </div>
-                      )}
-                      {message.status?.description && (
-                        <p className="text-sm text-gray-300">{message.status.description}</p>
-                      )}
                     </div>
                   ) : (
-                    <div className="prose prose-sm prose-invert max-w-none">
-                      <ReactMarkdown 
-                        components={{
-                        code: ({ children, className }) => (
-                          <code className={`${className} bg-gray-800 px-2 py-1 rounded text-blue-300`}>
-                            {children}
-                          </code>
-                        ),
-                        pre: ({ children }) => (
-                          <pre className="bg-gray-900 p-3 rounded-lg overflow-x-auto text-sm">
-                            {children}
-                          </pre>
-                        ),
-                        h1: ({ children }) => (
-                          <h1 className="text-xl font-bold text-white mb-3">{children}</h1>
-                        ),
-                        h2: ({ children }) => (
-                          <h2 className="text-lg font-semibold text-white mb-2">{children}</h2>
-                        ),
-                        p: ({ children }) => (
-                          <p className="text-gray-200 mb-2">{children}</p>
-                        ),
-                        ul: ({ children }) => (
-                          <ul className="list-disc list-inside space-y-1 text-gray-200">{children}</ul>
-                        ),
-                        li: ({ children }) => (
-                          <li className="text-gray-200">{children}</li>
-                        )
-                        }}
-                      >
-                        {message.content}
-                      </ReactMarkdown>
-                    </div>
+                    renderMessageContent(message) // Use the new renderMessageContent function
                   )}
-                  <div className="mt-2 text-xs text-gray-500">
-                    {new Date(message.timestamp).toLocaleTimeString()}
-                  </div>
                 </div>
               </div>
+              {/* Timestamp */}
+              <p className={`text-[11px] text-gray-500 mt-1.5 ${message.type === 'user' ? 'mr-12 text-right' : 'ml-12 text-left'}`}>
+                {new Date(message.timestamp).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+              </p>
             </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="flex-shrink-0 p-4 border-t border-white/10 bg-black/20 backdrop-blur-md">
-        <div className="flex gap-3">
+      {/* Input area */}
+      <div className="sticky bottom-0 left-0 right-0 bg-gray-800/90 backdrop-blur-md border-t border-gray-700/80 p-3 sm:p-4">
+        <div className="flex items-end gap-2 sm:gap-3 max-w-4xl mx-auto bg-gray-700/60 rounded-xl p-2 border border-gray-600/70 shadow-lg">
+          {/* TODO: Add buttons for image upload, file attachment, etc. if needed */}
+          {/* <button className="p-2 text-gray-400 hover:text-blue-400 rounded-full hover:bg-gray-600 transition-colors">
+            <Paperclip size={20} />
+          </button> */}
           <textarea
             ref={inputRef}
             value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask me anything about coding..."
-            className="input-premium flex-1 min-h-[44px] max-h-32 resize-none"
+            onChange={(e) => {
+              setInputMessage(e.target.value);
+              // Auto-resize textarea
+              e.target.style.height = 'auto';
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
+            onKeyDown={(e) => { // Changed from onKeyPress to onKeyDown for consistency and broader key support
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+                if (inputRef.current) {
+                  inputRef.current.style.height = 'auto'; // Reset height after send
+                }
+              }
+            }}
+            placeholder="Ask AI anything or type a command..."
+            className="flex-1 bg-transparent text-white placeholder-gray-400 px-3 py-2.5 text-sm resize-none focus:outline-none max-h-36 sm:max-h-48 overflow-y-auto"
             rows={1}
+            style={{ scrollbarWidth: 'thin' }} // For Firefox
             disabled={isLoading}
           />
           <button
-            onClick={handleSendMessage}
-            disabled={!inputMessage.trim() || isLoading}
-            className="btn-primary btn-sm px-4 flex-shrink-0"
+            onClick={() => {
+              handleSendMessage();
+              if (inputRef.current) {
+                inputRef.current.style.height = 'auto'; // Reset height after send
+              }
+            }}
+            disabled={isLoading || !inputMessage.trim()}
+            className="p-2.5 sm:p-3 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-500 disabled:cursor-not-allowed rounded-lg transition-all duration-200 transform active:scale-95"
+            title="Send message (Enter)"
           >
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
+            {isLoading ? <Loader2 size={20} className="animate-spin text-white" /> : <Send size={20} className="text-white" />}
           </button>
         </div>
+        <p className="text-xs text-gray-500 text-center mt-2">Shift+Enter for new line. Markdown supported.</p>
       </div>
 
       {/* Status Detail Modal */}

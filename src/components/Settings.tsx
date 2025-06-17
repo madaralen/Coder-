@@ -120,15 +120,16 @@ export default function Settings() {
     children 
   }: { 
     title: string; 
-    icon: React.ComponentType<{ size?: number }>; 
+    icon: React.ComponentType<{ size?: number; className?: string }>; 
     children: React.ReactNode 
   }) => (
-    <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700">
-      <div className="flex items-center gap-3 mb-4">
-        <Icon size={18} />
-        <h3 className="text-base sm:text-lg font-semibold">{title}</h3>
+    // Adjusted section styling for better fit in sidebar
+    <div className="bg-gray-700/50 rounded-lg p-4 border border-gray-600/70">
+      <div className="flex items-center gap-2.5 mb-3">
+        <Icon size={18} className="text-blue-400" />
+        <h3 className="text-md font-semibold text-gray-100">{title}</h3>
       </div>
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-3">
         {children}
       </div>
     </div>
@@ -143,45 +144,47 @@ export default function Settings() {
     description?: string; 
     children: React.ReactNode 
   }) => (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
-      <div className="flex-1">
-        <label className="text-sm font-medium">{label}</label>
-        {description && (
-          <p className="text-xs text-gray-400 mt-1">{description}</p>
-        )}
+    // Simplified SettingRow for sidebar context, primarily vertical stacking
+    <div className="border-t border-gray-600/50 pt-3 first:border-t-0 first:pt-0">
+      <div className="flex justify-between items-center">
+        <label className="text-sm font-medium text-gray-200">{label}</label>
+        <div className="flex-shrink-0">
+          {children}
+        </div>
       </div>
-      <div className="sm:ml-4 flex-shrink-0">
-        {children}
-      </div>
+      {description && (
+        <p className="text-xs text-gray-400 mt-1 pr-4">{description}</p>
+      )}
     </div>
   );
 
   return (
-    <div className="flex-1 bg-gray-900 overflow-y-auto">
-      <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-20 sm:pb-6 pt-16 sm:pt-6">
+    // Adjusted padding for sidebar context, removed mx-auto and max-w as sidebar controls width
+    <div className="flex-1 bg-gray-800 overflow-y-auto text-white"> 
+      <div className="p-4 space-y-6"> {/* Consistent padding and spacing */}
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+        <div className="flex items-center justify-between pb-4 border-b border-gray-700">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold">Settings</h1>
-            <p className="text-gray-400 mt-1 text-sm sm:text-base">Customize your coding environment</p>
+            <h1 className="text-xl font-semibold">Settings</h1>
+            <p className="text-gray-400 text-sm mt-0.5">Customize your environment</p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {hasUnsavedChanges && (
-              <span className="text-yellow-400 text-xs sm:text-sm">Unsaved changes</span>
+              <span className="text-yellow-400 text-xs font-medium animate-pulse">Unsaved</span>
             )}
-            
             <button
               onClick={saveSettings}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm sm:text-base"
+              disabled={!hasUnsavedChanges}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-md text-sm font-medium transition-colors"
             >
-              <Save size={14} className="sm:w-4 sm:h-4" />
+              <Save size={14} />
               Save
             </button>
           </div>
         </div>
 
-        <div className="grid gap-4 sm:gap-6">
+        <div className="space-y-6"> {/* Changed grid to space-y for better flow in sidebar */}
           {/* Appearance */}
           <SettingSection title="Appearance" icon={Palette}>
             <SettingRow 
@@ -191,7 +194,7 @@ export default function Settings() {
               <select 
                 value={settings.theme}
                 onChange={(e) => updateSetting('theme', e.target.value as 'dark' | 'light' | 'auto')}
-                className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm min-w-[120px]"
+                className="bg-gray-600 border border-gray-500 rounded-md px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 min-w-[100px]"
               >
                 <option value="dark">Dark</option>
                 <option value="light">Light</option>
@@ -206,7 +209,7 @@ export default function Settings() {
               <select 
                 value={settings.editorTheme}
                 onChange={(e) => updateSetting('editorTheme', e.target.value)}
-                className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm min-w-[120px]"
+                className="bg-gray-600 border border-gray-500 rounded-md px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 min-w-[100px]"
               >
                 <option value="vs-dark">VS Code Dark</option>
                 <option value="vs-light">VS Code Light</option>
@@ -224,7 +227,7 @@ export default function Settings() {
               <select 
                 value={settings.fontFamily}
                 onChange={(e) => updateSetting('fontFamily', e.target.value)}
-                className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm min-w-[150px]"
+                className="bg-gray-600 border border-gray-500 rounded-md px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 min-w-[120px]"
               >
                 <option value="JetBrains Mono">JetBrains Mono</option>
                 <option value="Fira Code">Fira Code</option>
@@ -245,9 +248,9 @@ export default function Settings() {
                   max="24"
                   value={settings.fontSize}
                   onChange={(e) => updateSetting('fontSize', parseInt(e.target.value))}
-                  className="w-20"
+                  className="w-20 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500" // Styled range
                 />
-                <span className="text-sm w-8 text-center">{settings.fontSize}px</span>
+                <span className="text-xs w-8 text-center text-gray-300">{settings.fontSize}px</span>
               </div>
             </SettingRow>
 
@@ -258,7 +261,7 @@ export default function Settings() {
               <select 
                 value={settings.tabSize}
                 onChange={(e) => updateSetting('tabSize', parseInt(e.target.value))}
-                className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm min-w-[80px]"
+                className="bg-gray-600 border border-gray-500 rounded-md px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 min-w-[90px]"
               >
                 <option value={2}>2 spaces</option>
                 <option value={4}>4 spaces</option>
@@ -275,17 +278,9 @@ export default function Settings() {
                   type="checkbox"
                   checked={settings.showMinimap}
                   onChange={(e) => updateSetting('showMinimap', e.target.checked)}
-                  className="sr-only"
+                  className="sr-only peer"
                 />
-                <div className={`
-                  w-11 h-6 rounded-full transition-colors duration-200
-                  ${settings.showMinimap ? 'bg-blue-600' : 'bg-gray-600'}
-                `}>
-                  <div className={`
-                    w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200
-                    ${settings.showMinimap ? 'translate-x-5' : 'translate-x-0'}
-                  `} style={{ marginTop: '2px', marginLeft: '2px' }} />
-                </div>
+                <div className="w-9 h-5 bg-gray-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </SettingRow>
 
@@ -293,22 +288,14 @@ export default function Settings() {
               label="Word Wrap" 
               description="Wrap long lines"
             >
-              <label className="flex items-center cursor-pointer">
+              <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
                   checked={settings.wordWrap}
                   onChange={(e) => updateSetting('wordWrap', e.target.checked)}
-                  className="sr-only"
+                  className="sr-only peer"
                 />
-                <div className={`
-                  w-11 h-6 rounded-full transition-colors duration-200
-                  ${settings.wordWrap ? 'bg-blue-600' : 'bg-gray-600'}
-                `}>
-                  <div className={`
-                    w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200
-                    ${settings.wordWrap ? 'translate-x-5' : 'translate-x-0'}
-                  `} style={{ marginTop: '2px', marginLeft: '2px' }} />
-                </div>
+                <div className="w-9 h-5 bg-gray-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </SettingRow>
 
@@ -316,22 +303,14 @@ export default function Settings() {
               label="Line Numbers" 
               description="Show line numbers"
             >
-              <label className="flex items-center cursor-pointer">
+              <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
                   checked={settings.lineNumbers}
                   onChange={(e) => updateSetting('lineNumbers', e.target.checked)}
-                  className="sr-only"
+                  className="sr-only peer"
                 />
-                <div className={`
-                  w-11 h-6 rounded-full transition-colors duration-200
-                  ${settings.lineNumbers ? 'bg-blue-600' : 'bg-gray-600'}
-                `}>
-                  <div className={`
-                    w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200
-                    ${settings.lineNumbers ? 'translate-x-5' : 'translate-x-0'}
-                  `} style={{ marginTop: '2px', marginLeft: '2px' }} />
-                </div>
+                <div className="w-9 h-5 bg-gray-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </SettingRow>
 
@@ -339,22 +318,14 @@ export default function Settings() {
               label="Auto Save" 
               description="Automatically save files"
             >
-              <label className="flex items-center cursor-pointer">
+              <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
                   checked={settings.autoSave}
                   onChange={(e) => updateSetting('autoSave', e.target.checked)}
-                  className="sr-only"
+                  className="sr-only peer"
                 />
-                <div className={`
-                  w-11 h-6 rounded-full transition-colors duration-200
-                  ${settings.autoSave ? 'bg-blue-600' : 'bg-gray-600'}
-                `}>
-                  <div className={`
-                    w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200
-                    ${settings.autoSave ? 'translate-x-5' : 'translate-x-0'}
-                  `} style={{ marginTop: '2px', marginLeft: '2px' }} />
-                </div>
+                <div className="w-9 h-5 bg-gray-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </SettingRow>
           </SettingSection>
@@ -372,9 +343,9 @@ export default function Settings() {
                   max="20"
                   value={settings.terminalFontSize}
                   onChange={(e) => updateSetting('terminalFontSize', parseInt(e.target.value))}
-                  className="w-20"
+                  className="w-20 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500" // Styled range
                 />
-                <span className="text-sm w-8 text-center">{settings.terminalFontSize}px</span>
+                <span className="text-xs w-8 text-center text-gray-300">{settings.terminalFontSize}px</span>
               </div>
             </SettingRow>
           </SettingSection>
@@ -388,7 +359,7 @@ export default function Settings() {
               <select 
                 value={settings.aiModel}
                 onChange={(e) => updateSetting('aiModel', e.target.value)}
-                className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm min-w-[150px]"
+                className="bg-gray-600 border border-gray-500 rounded-md px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 min-w-[120px]"
               >
                 {availableModels.map(model => (
                   <option key={model} value={model}>
@@ -408,7 +379,7 @@ export default function Settings() {
               <select 
                 value={settings.language}
                 onChange={(e) => updateSetting('language', e.target.value)}
-                className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm min-w-[120px]"
+                className="bg-gray-600 border border-gray-500 rounded-md px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 min-w-[100px]"
               >
                 <option value="en">English</option>
                 <option value="es">Español</option>
@@ -428,34 +399,26 @@ export default function Settings() {
                   type="checkbox"
                   checked={settings.soundEnabled}
                   onChange={(e) => updateSetting('soundEnabled', e.target.checked)}
-                  className="sr-only"
+                  className="sr-only peer"
                 />
-                <div className={`
-                  w-11 h-6 rounded-full transition-colors duration-200
-                  ${settings.soundEnabled ? 'bg-blue-600' : 'bg-gray-600'}
-                `}>
-                  <div className={`
-                    w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200
-                    ${settings.soundEnabled ? 'translate-x-5' : 'translate-x-0'}
-                  `} style={{ marginTop: '2px', marginLeft: '2px' }} />
-                </div>
+                <div className="w-9 h-5 bg-gray-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </SettingRow>
           </SettingSection>
 
           {/* Import/Export */}
           <SettingSection title="Backup & Restore" icon={Download}>
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 onClick={exportSettings}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg"
+                className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm text-gray-200 transition-colors"
               >
-                <Download size={16} />
+                <Download size={14} />
                 Export Settings
               </button>
               
-              <label className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg cursor-pointer">
-                <Upload size={16} />
+              <label className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-600 hover:bg-gray-500 rounded-md text-sm text-gray-200 cursor-pointer transition-colors">
+                <Upload size={14} />
                 Import Settings
                 <input
                   type="file"
@@ -467,9 +430,9 @@ export default function Settings() {
               
               <button
                 onClick={resetSettings}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg"
+                className="col-span-1 sm:col-span-2 flex items-center justify-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-500 rounded-md text-sm text-white transition-colors"
               >
-                <RotateCcw size={16} />
+                <RotateCcw size={14} />
                 Reset to Defaults
               </button>
             </div>
