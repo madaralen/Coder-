@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Logs - Coder Bot{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-white">System Logs</h2>
+        <div class="text-sm text-gray-400">
+            Real-time bot activity logs
+        </div>
+    </div>
+
+    <!-- Log Viewer -->
+    <div class="bg-gray-800 rounded-lg border border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-white">Recent Activity</h3>
+            <div class="flex items-center space-x-2">
+                <button onclick="refreshLogs()" class="inline-flex items-center px-3 py-1 border border-gray-600 rounded-md text-xs font-medium text-gray-300 bg-gray-700 hover:bg-gray-600">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Refresh
+                </button>
+                <button onclick="toggleAutoRefresh()" id="auto-refresh-btn" class="inline-flex items-center px-3 py-1 border border-gray-600 rounded-md text-xs font-medium text-gray-300 bg-gray-700 hover:bg-gray-600">
+                    <div class="w-2 h-2 bg-gray-400 rounded-full mr-2" id="auto-refresh-indicator"></div>
+                    Auto
+                </button>
+            </div>
+        </div>
+        
+        <div class="p-6">
+            <div class="bg-gray-900 rounded-lg p-4 h-96 overflow-y-auto scrollbar-thin font-mono text-sm" id="log-container">
+                <!-- Sample log entries -->
+                <div class="space-y-1 text-gray-300">
+                    <div class="flex">
+                        <span class="text-gray-500 w-20">INFO</span>
+                        <span class="text-gray-400 w-24">12:34:56</span>
+                        <span>Application started successfully</span>
+                    </div>
+                    <div class="flex">
+                        <span class="text-blue-400 w-20">DEBUG</span>
+                        <span class="text-gray-400 w-24">12:35:01</span>
+                        <span>Database connection established</span>
+                    </div>
+                    <div class="flex">
+                        <span class="text-green-400 w-20">INFO</span>
+                        <span class="text-gray-400 w-24">12:35:15</span>
+                        <span>GitHub webhook received: issues.opened</span>
+                    </div>
+                    <div class="flex">
+                        <span class="text-green-400 w-20">INFO</span>
+                        <span class="text-gray-400 w-24">12:35:16</span>
+                        <span>Created conversation for repo: user/example-repo #123</span>
+                    </div>
+                    <div class="flex">
+                        <span class="text-yellow-400 w-20">WARN</span>
+                        <span class="text-gray-400 w-24">12:35:20</span>
+                        <span>AI response generation took longer than expected (3.2s)</span>
+                    </div>
+                    <div class="flex">
+                        <span class="text-green-400 w-20">INFO</span>
+                        <span class="text-gray-400 w-24">12:35:22</span>
+                        <span>Posted comment to GitHub issue #123</span>
+                    </div>
+                    <div class="flex">
+                        <span class="text-blue-400 w-20">DEBUG</span>
+                        <span class="text-gray-400 w-24">12:35:30</span>
+                        <span>GitHub webhook received: issue_comment.created</span>
+                    </div>
+                    <div class="flex">
+                        <span class="text-red-400 w-20">ERROR</span>
+                        <span class="text-gray-400 w-24">12:36:01</span>
+                        <span>Failed to process webhook: Invalid signature</span>
+                    </div>
+                </div>
+                
+                <!-- Placeholder for when no logs are available -->
+                <div class="hidden text-center py-8" id="no-logs-message">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-300">No logs available</h3>
+                    <p class="mt-1 text-sm text-gray-400">Logs will appear here as the bot processes events.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Level Filter -->
+    <div class="bg-gray-800 rounded-lg border border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-700">
+            <h3 class="text-lg font-semibold text-white">Log Filters</h3>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <label class="flex items-center">
+                    <input type="checkbox" checked class="rounded border-gray-600 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" onchange="toggleLogLevel('ERROR')">
+                    <span class="ml-2 text-sm text-red-400">ERROR</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="checkbox" checked class="rounded border-gray-600 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" onchange="toggleLogLevel('WARN')">
+                    <span class="ml-2 text-sm text-yellow-400">WARN</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="checkbox" checked class="rounded border-gray-600 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" onchange="toggleLogLevel('INFO')">
+                    <span class="ml-2 text-sm text-green-400">INFO</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="checkbox" class="rounded border-gray-600 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" onchange="toggleLogLevel('DEBUG')">
+                    <span class="ml-2 text-sm text-blue-400">DEBUG</span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let autoRefreshEnabled = false;
+let refreshInterval;
+
+function refreshLogs() {
+    // This would fetch real logs from the server
+    console.log('Refreshing logs...');
+    // For now, just add a timestamp to show it's working
+    const container = document.getElementById('log-container');
+    const now = new Date();
+    const timeStr = now.toTimeString().split(' ')[0];
+    
+    const logEntry = document.createElement('div');
+    logEntry.className = 'flex';
+    logEntry.innerHTML = `
+        <span class="text-green-400 w-20">INFO</span>
+        <span class="text-gray-400 w-24">${timeStr}</span>
+        <span>Logs refreshed manually</span>
+    `;
+    
+    container.querySelector('.space-y-1').appendChild(logEntry);
+    container.scrollTop = container.scrollHeight;
+}
+
+function toggleAutoRefresh() {
+    autoRefreshEnabled = !autoRefreshEnabled;
+    const btn = document.getElementById('auto-refresh-btn');
+    const indicator = document.getElementById('auto-refresh-indicator');
+    
+    if (autoRefreshEnabled) {
+        indicator.className = 'w-2 h-2 bg-green-500 rounded-full mr-2';
+        refreshInterval = setInterval(refreshLogs, 5000); // Refresh every 5 seconds
+    } else {
+        indicator.className = 'w-2 h-2 bg-gray-400 rounded-full mr-2';
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+        }
+    }
+}
+
+function toggleLogLevel(level) {
+    // This would filter logs by level
+    console.log(`Toggled log level: ${level}`);
+}
+
+// Scroll to bottom of logs on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('log-container');
+    container.scrollTop = container.scrollHeight;
+});
+</script>
+{% endblock %}
